@@ -1,0 +1,204 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Code Saathi — AI Learning Code Reviewer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<!-- ═══ SPLASH / AUTH GATE ═══ -->
+<div id="splash">
+  <div class="splash-card">
+    <div class="splash-logo">&lt;/&gt;</div>
+    <h1>Code <span>Saathi</span></h1>
+    <p class="splash-tagline">Your AI-powered learning code reviewer</p>
+    <div class="splash-pills">
+      <span><i class="ti ti-bug"></i> Mistake Explanations</span>
+      <span><i class="ti ti-clock"></i> Complexity Analysis</span>
+      <span><i class="ti ti-rocket"></i> Optimized Code</span>
+      <span><i class="ti ti-help-circle"></i> Interview Prep</span>
+      <span><i class="ti ti-map"></i> Learning Roadmap</span>
+      <span><i class="ti ti-trending-up"></i> Progress Tracking</span>
+    </div>
+    <button class="sp-btn primary" onclick="openModal('login')"><i class="ti ti-login"></i> Sign In</button>
+    <button class="sp-btn outline" onclick="openModal('register')"><i class="ti ti-user-plus"></i> Create Account</button>
+    <button class="sp-btn ghost" onclick="guestMode()">Continue as Guest &rarr;</button>
+  </div>
+</div>
+
+<!-- ═══ AUTH MODAL ═══ -->
+<div id="auth-modal" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <button class="modal-x" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    <div class="modal-logo">&lt;/&gt;</div>
+    <h2 id="m-title">Sign In</h2>
+    <p id="m-sub">Welcome back to Code Saathi</p>
+    <div id="m-name-wrap">
+      <label>Your Name</label>
+      <input id="m-name" type="text" placeholder="Full name" class="m-input">
+    </div>
+    <label>Email</label>
+    <input id="m-email" type="email" placeholder="you@email.com" class="m-input">
+    <label>Password</label>
+    <input id="m-pass" type="password" placeholder="Password (min 6 chars)" class="m-input">
+    <div id="m-error" class="m-error" style="display:none"></div>
+    <button id="m-btn" class="m-submit" onclick="submitAuth()">Sign In</button>
+    <p class="m-switch">
+      <span id="m-switch-text">No account?</span>
+      <button onclick="toggleMode()" id="m-switch-btn">Register</button>
+    </p>
+  </div>
+</div>
+
+<!-- ═══ MAIN APP ═══ -->
+<div id="app" style="display:none">
+
+  <!-- HEADER -->
+  <header id="header">
+    <div class="h-left">
+      <div class="h-logo">&lt;/&gt;</div>
+      <div>
+        <div class="h-brand">Code <span>Saathi</span></div>
+        <div class="h-tagline">AI Learning Code Reviewer</div>
+      </div>
+    </div>
+    <nav class="h-tabs">
+      <button class="htab active" id="htab-review"   onclick="switchTab('review')"><i class="ti ti-code"></i> Review</button>
+      <button class="htab"        id="htab-history"  onclick="switchTab('history')"><i class="ti ti-clock-history"></i> History</button>
+      <button class="htab"        id="htab-progress" onclick="switchTab('progress')"><i class="ti ti-trending-up"></i> Progress</button>
+    </nav>
+    <div class="h-right">
+      <div class="streak-badge" onclick="switchTab('progress')">
+        <i class="ti ti-flame"></i>
+        <span id="streak-num">0</span>
+        <span class="s-label">streak</span>
+      </div>
+      <div class="user-btn" id="user-btn" onclick="toggleUserMenu()">
+        <div class="u-avatar" id="u-avatar">G</div>
+        <span id="u-name">Guest</span>
+        <i class="ti ti-chevron-down"></i>
+      </div>
+      <div class="user-menu" id="user-menu" style="display:none">
+        <div id="um-login"  class="um-item" onclick="openModal('login')"><i class="ti ti-login"></i> Sign In</div>
+        <div id="um-reg"    class="um-item" onclick="openModal('register')"><i class="ti ti-user-plus"></i> Register</div>
+        <div id="um-logout" class="um-item danger" style="display:none" onclick="logout()"><i class="ti ti-logout"></i> Sign Out</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ REVIEW TAB ═══ -->
+  <div id="tab-review" class="tab-panel">
+    <div class="review-layout">
+
+      <!-- LEFT: EDITOR -->
+      <div class="editor-col">
+        <div class="editor-bar">
+          <div class="eb-left">
+            <select id="lang-sel" class="sel">
+              <option>Python</option><option>JavaScript</option><option>Java</option>
+              <option>C++</option><option>C</option><option>TypeScript</option>
+              <option>Go</option><option>Rust</option><option>Kotlin</option><option>Swift</option>
+            </select>
+            <button class="icon-btn" id="hl-btn" onclick="toggleHL()" title="Syntax highlight"><i class="ti ti-highlight"></i></button>
+            <button class="icon-btn" onclick="fmtCode()"  title="Format"><i class="ti ti-indent-increase"></i></button>
+            <button class="icon-btn" onclick="cpyCode()"  title="Copy code"><i class="ti ti-copy"></i></button>
+          </div>
+          <div class="eb-right">
+            <button class="icon-btn" onclick="loadEx()"><i class="ti ti-file-code"></i> Example</button>
+            <button class="icon-btn danger" onclick="clrEditor()"><i class="ti ti-trash"></i></button>
+          </div>
+        </div>
+        <div class="editor-body" id="editor-body">
+          <textarea id="code-ta" spellcheck="false" placeholder="# Paste your code here…
+# Code Saathi will:
+#   ✦ Find & explain mistakes
+#   ✦ Estimate time complexity
+#   ✦ Generate optimized code
+#   ✦ Create interview questions
+#   ✦ Build your learning roadmap"></textarea>
+          <div id="hl-view" style="display:none"></div>
+        </div>
+        <div class="editor-foot">
+          <span id="line-cnt" class="lc">0 lines</span>
+          <button id="analyze-btn" class="analyze-btn" onclick="doAnalyze()">
+            <i class="ti ti-sparkles"></i> Analyze Code
+          </button>
+        </div>
+      </div>
+
+      <!-- RIGHT: RESULTS -->
+      <div class="results-col">
+        <div id="results-body" class="results-body">
+          <div class="empty-st">
+            <i class="ti ti-brain"></i>
+            <p>Paste code and click <strong>Analyze Code</strong></p>
+            <small>Full AI-powered review in seconds</small>
+          </div>
+        </div>
+        <div id="exp-bar" class="exp-bar" style="display:none">
+          <button class="sm-btn" onclick="expPDF()"><i class="ti ti-file-download"></i> Export PDF</button>
+          <button class="sm-btn" onclick="cpyReport()"><i class="ti ti-copy"></i> Copy Report</button>
+          <button class="sm-btn" onclick="shareRep()"><i class="ti ti-share"></i> Share</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ HISTORY TAB ═══ -->
+  <div id="tab-history" class="tab-panel" style="display:none">
+    <div class="inner-wrap">
+      <div class="inner-head">
+        <h2>Review History</h2>
+        <button class="sm-btn danger" onclick="clrHistory()"><i class="ti ti-trash"></i> Clear All</button>
+      </div>
+      <div id="hist-list"></div>
+    </div>
+  </div>
+
+  <!-- ═══ PROGRESS TAB ═══ -->
+  <div id="tab-progress" class="tab-panel" style="display:none">
+    <div class="inner-wrap">
+      <div class="inner-head"><h2>My Progress</h2></div>
+      <div class="stats-grid" id="stats-grid"></div>
+      <div class="prog-grid">
+        <div class="prog-box">
+          <div class="pb-title"><i class="ti ti-flame"></i> Activity — Last 28 Days</div>
+          <div class="cal-hdr"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+          <div class="cal-grid" id="cal-grid"></div>
+          <div class="cal-leg"><span class="cldot off"></span>No review &nbsp;<span class="cldot on"></span>Reviewed</div>
+        </div>
+        <div class="prog-box">
+          <div class="pb-title"><i class="ti ti-chart-line"></i> Score Trend</div>
+          <canvas id="score-chart" height="160"></canvas>
+          <div id="chart-empty" class="chart-empty">Complete reviews to see your trend</div>
+        </div>
+      </div>
+      <div class="prog-box" style="margin-top:14px">
+        <div class="pb-title"><i class="ti ti-code"></i> Languages Reviewed</div>
+        <div id="lang-chart"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/results.js"></script>
+<script src="js/progress.js"></script>
+<script src="js/export.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
