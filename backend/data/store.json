@@ -27,6 +27,135 @@
   ],
   "reviews": [
     {
+      "_id": "rev_1787037436731_5ngwqx",
+      "userId": "usr_1787036038722_u8f7lo",
+      "language": "Python",
+      "code": "public class ArrayRotation {\n    public static void rotateRight(int[] nums, int k) {\n        if (nums == null || nums.length == 0) return;\n        int n = nums.length;\n        k = k % n;\n        if (k == 0) return;\n\n        // Reverse the whole array\n        reverse(nums, 0, n - 1);\n        // Reverse the first k elements\n        reverse(nums, 0, k - 1);\n        // Reverse the remaining elements\n        reverse(nums, k, n - 1);\n    }\n\n    private static void reverse(int[] nums, int start, int end) {\n        while (start < end) {\n            int temp = nums[start];\n            nums[start] = nums[end];\n            nums[end] = temp;\n            start++;\n            end--;\n        }\n    }\n}",
+      "score": 90,
+      "scoreLabel": "Excellent",
+      "summary": "The provided Java code, translated to Python, correctly implements the efficient three-reversal algorithm for in-place array rotation, demonstrating strong algorithmic understanding.",
+      "complexity": {
+        "time": "O(n)",
+        "space": "O(1)",
+        "explanation": "The `_reverse` helper function iterates through a portion of the array. Since the main `rotate_right` function calls `_reverse` a constant number of times (three times), the total operations scale linearly with the number of elements 'n'. No additional data structures are created that grow with the input size, making the space complexity constant."
+      },
+      "mistakes": [
+        {
+          "title": "Language Mismatch",
+          "body": "The code you provided was written in Java, but the request was specifically for a Python code review. In a real-world scenario or an exam, paying close attention to the specified programming language is crucial to ensure your solution meets the requirements. I've translated your logic to Python for this review."
+        },
+        {
+          "title": "Missing Docstrings/Comments",
+          "body": "While your logic is clear, adding docstrings to your functions (like `rotate_right` and `_reverse`) is a best practice in Python. Docstrings explain what a function does, its arguments, and what it returns, making your code much easier to understand and maintain for yourself and others."
+        },
+        {
+          "title": "Class vs. Standalone Function",
+          "body": "For a single utility operation like array rotation, a standalone function (not nested within a class) is often more common and simpler in Python. Classes are typically used when you need to manage state or group related methods, which isn't strictly necessary for this particular problem."
+        }
+      ],
+      "optimizedCode": "def rotate_right(nums: list[int], k: int) -> None:\n    \"\"\"\n    Rotates the given list `nums` to the right by `k` steps in-place.\n\n    This implementation uses the efficient three-reversal algorithm,\n    which has O(n) time complexity and O(1) space complexity.\n\n    Args:\n        nums: The list of integers to be rotated.\n        k: The number of steps to rotate the list to the right.\n    \"\"\"\n    if not nums:\n        return\n\n    n = len(nums)\n    k = k % n  # Normalize k to be within the bounds of the array length\n    if k == 0:\n        return # No rotation needed if k is 0 after normalization\n\n    # Helper function to reverse a sub-array in-place\n    def _reverse(arr: list[int], start: int, end: int) -> None:\n        while start < end:\n            arr[start], arr[end] = arr[end], arr[start] # Pythonic swap\n            start += 1\n            end -= 1\n\n    # Step 1: Reverse the entire array\n    # Example: [1,2,3,4,5], k=2 -> [5,4,3,2,1]\n    _reverse(nums, 0, n - 1)\n\n    # Step 2: Reverse the first k elements\n    # Example: [5,4,3,2,1] -> [4,5,3,2,1] (for k=2, first 2 elements reversed)\n    _reverse(nums, 0, k - 1)\n\n    # Step 3: Reverse the remaining n-k elements\n    # Example: [4,5,3,2,1] -> [4,5,1,2,3] (for k=2, remaining 3 elements reversed)\n    _reverse(nums, k, n - 1)\n",
+      "optimizationNotes": "The provided Java code already implements an optimal in-place rotation algorithm using the three-reversal method. The 'optimized_code' primarily translates this efficient logic into Python, adds comprehensive docstrings for improved readability and maintainability, and presents it as a standalone function, which is often preferred for utility tasks in Python.",
+      "interviewQuestions": [
+        "Can you explain the time and space complexity of this array rotation algorithm, and why it's considered efficient?",
+        "What are some alternative approaches to rotate an array, and what are their trade-offs in terms of time, space, and implementation complexity?",
+        "How would you modify this code to rotate the array to the *left* by `k` steps instead of the right, while maintaining O(1) space complexity?"
+      ],
+      "roadmap": [
+        {
+          "title": "Mastering In-place Algorithms",
+          "desc": "Deepen your understanding of algorithms that modify data structures directly without using significant extra memory. This skill is crucial for optimizing space complexity in competitive programming and interviews. Practice problems like reversing a linked list in-place or partitioning an array. Aim for 2-3 weeks."
+        },
+        {
+          "title": "Pythonic Code & Best Practices",
+          "desc": "Explore more Python-specific features like list comprehensions, generators, and advanced slicing. Focus on writing clean, readable code by consistently using docstrings, type hints, and adhering to PEP 8 style guidelines. This will make your code more professional and easier to collaborate on. Dedicate 1-2 weeks to this."
+        },
+        {
+          "title": "Advanced Array & List Problems",
+          "desc": "Practice a variety of challenging problems involving arrays and lists, such as finding duplicates, merging sorted arrays, implementing two-pointer techniques, or solving problems on LeetCode. This will solidify your problem-solving skills and prepare you for common interview scenarios. Continue practicing regularly over several months."
+        }
+      ],
+      "createdAt": "2026-08-18T07:17:16.731Z"
+    },
+    {
+      "_id": "rev_1787037342520_cd02wf",
+      "userId": "usr_1787036038722_u8f7lo",
+      "language": "Java",
+      "code": "public class ArrayRotation {\n    public static void rotateRight(int[] nums, int k) {\n        if (nums == null || nums.length == 0) return;\n        int n = nums.length;\n        k = k % n;\n        if (k == 0) return;\n\n        // Reverse the whole array\n        reverse(nums, 0, n - 1);\n        // Reverse the first k elements\n        reverse(nums, 0, k - 1);\n        // Reverse the remaining elements\n        reverse(nums, k, n - 1);\n    }\n\n    private static void reverse(int[] nums, int start, int end) {\n        while (start < end) {\n            int temp = nums[start];\n            nums[start] = nums[end];\n            nums[end] = temp;\n            start++;\n            end--;\n        }\n    }\n}",
+      "score": 95,
+      "scoreLabel": "Excellent",
+      "summary": "This code provides an efficient and well-structured solution for right-rotating an array using the reversal algorithm, handling edge cases effectively.",
+      "complexity": {
+        "time": "O(n)",
+        "space": "O(1)",
+        "explanation": "The 'reverse' operation iterates through at most half of the array elements. Since 'rotateRight' calls 'reverse' three times, each covering different parts of the array but collectively processing each element a constant number of times, the total time complexity is linear with respect to the array size 'n'. The space complexity is constant because only a few temporary variables are used, regardless of the array's size."
+      },
+      "mistakes": [],
+      "optimizedCode": "public class ArrayRotation {\n    public static void rotateRight(int[] nums, int k) {\n        // Handle edge cases: null array, empty array\n        if (nums == null || nums.length == 0) {\n            return;\n        }\n\n        int n = nums.length;\n        // Normalize k: if k is larger than n, or k is negative, it should be within [0, n-1]\n        k = k % n;\n\n        // If k is 0 after normalization, no rotation is needed\n        if (k == 0) {\n            return;\n        }\n\n        // The three-reversal algorithm for right rotation:\n        // 1. Reverse the entire array\n        reverse(nums, 0, n - 1);\n        // Example: [1,2,3,4,5], k=2 -> [5,4,3,2,1]\n\n        // 2. Reverse the first k elements\n        reverse(nums, 0, k - 1);\n        // Example: [5,4,3,2,1] -> [4,5,3,2,1] (for k=2)\n\n        // 3. Reverse the remaining (n-k) elements\n        reverse(nums, k, n - 1);\n        // Example: [4,5,3,2,1] -> [4,5,1,2,3] (for k=2)\n    }\n\n    /**\n     * Helper method to reverse a portion of an array.\n     * @param nums The array to reverse.\n     * @param start The starting index (inclusive).\n     * @param end The ending index (inclusive).\n     */\n    private static void reverse(int[] nums, int start, int end) {\n        while (start < end) {\n            int temp = nums[start];\n            nums[start] = nums[end];\n            nums[end] = temp;\n            start++;\n            end--;\n        }\n    }\n}",
+      "optimizationNotes": "The reversal algorithm is highly efficient because it performs the rotation in-place using only O(1) extra space and completes in O(n) time. This avoids the O(n) space required by creating a new array or the O(n*k) time complexity of repeatedly shifting elements one by one. Your implementation correctly applies this optimal approach.",
+      "interviewQuestions": [
+        "Can you explain in detail why the three-reversal algorithm works for array right rotation?",
+        "What are other common approaches to rotate an array, and how do their time and space complexities compare to the reversal method?",
+        "How would you modify this code to perform a left rotation instead of a right rotation, while maintaining O(n) time and O(1) space complexity?"
+      ],
+      "roadmap": [
+        {
+          "title": "Explore Different Array Rotation Techniques",
+          "desc": "Investigate other methods like the Juggling Algorithm (GCD-based rotation) or using a temporary array. Understanding these alternatives will broaden your problem-solving toolkit and help you compare their efficiency trade-offs. Aim to understand the core logic and complexity of each."
+        },
+        {
+          "title": "Master In-place Algorithms",
+          "desc": "Deep dive into other algorithms that modify data structures without using significant extra space (O(1) or O(log n)). This is a crucial concept for optimizing memory usage in competitive programming and real-world applications. Practice problems like reversing a linked list in-place or partitioning an array."
+        },
+        {
+          "title": "Practice Modular Arithmetic Applications",
+          "desc": "Modular arithmetic is essential in many algorithms, especially in array manipulations (like rotation), hashing, and cryptography. Practice problems where understanding the modulo operator's behavior is key to finding an efficient solution. This will strengthen your mathematical foundation for algorithm design."
+        }
+      ],
+      "createdAt": "2026-08-18T07:15:42.520Z"
+    },
+    {
+      "_id": "rev_1787037244580_3oi9lc",
+      "userId": "usr_1787036038722_u8f7lo",
+      "language": "Java",
+      "code": "public class WorstArrayRotation {\n    public static void rotateRightWorst(int[] nums, int k) {\n        // WORST PRACTICE: Missing 'k = k % nums.length'\n        // If k is massive, this loop runs indefinitely for no reason!\n\n        // Outermost loop runs exactly k times\n        for (int i = 0; i < k; i++) {\n\n            // Save the very last element\n            int lastElement = nums[nums.length - 1];\n\n            // Shift every single element to the right by 1\n            for (int j = nums.length - 1; j > 0; j--) {\n                nums[j] = nums[j - 1];\n            }\n\n            // Move the saved element to the front\n            nums[0] = lastElement;\n        }\n    }\n}",
+      "score": 45,
+      "scoreLabel": "Needs Work",
+      "summary": "The current approach uses a nested loop strategy that results in inefficient time complexity for large arrays.",
+      "complexity": {
+        "time": "O(n * k)",
+        "space": "O(1)",
+        "explanation": "The nested loop structure causes the algorithm to perform redundant shifts, leading to quadratic time complexity in the worst case."
+      },
+      "mistakes": [
+        {
+          "title": "Inefficient Time Complexity",
+          "body": "Shifting elements one by one inside a loop is O(n*k). For large arrays, this will exceed time limits. Consider using the reversal algorithm."
+        },
+        {
+          "title": "Missing Modulo Operator",
+          "body": "Always use 'k = k % nums.length' at the start. If k is larger than the array size, you are performing unnecessary full rotations."
+        }
+      ],
+      "optimizedCode": "public class ArrayRotation {\n    public static void rotateRight(int[] nums, int k) {\n        if (nums == null || nums.length == 0) return;\n        int n = nums.length;\n        k = k % n;\n        if (k == 0) return;\n\n        // Reverse the whole array\n        reverse(nums, 0, n - 1);\n        // Reverse the first k elements\n        reverse(nums, 0, k - 1);\n        // Reverse the remaining elements\n        reverse(nums, k, n - 1);\n    }\n\n    private static void reverse(int[] nums, int start, int end) {\n        while (start < end) {\n            int temp = nums[start];\n            nums[start] = nums[end];\n            nums[end] = temp;\n            start++;\n            end--;\n        }\n    }\n}",
+      "optimizationNotes": "The reversal algorithm reduces time complexity to O(n) by performing three targeted reversals, eliminating the need for nested loops.",
+      "interviewQuestions": [
+        "How does the reversal algorithm achieve O(n) time complexity?",
+        "What happens to your code if the input array is empty or null?",
+        "Can you solve this problem using O(n) extra space, and how does that compare to the O(1) space approach?"
+      ],
+      "roadmap": [
+        {
+          "title": "Master Array Manipulation",
+          "desc": "Practice problems involving two-pointer techniques and in-place modifications to improve space efficiency. (1 week)"
+        },
+        {
+          "title": "Understand Big-O Analysis",
+          "desc": "Learn to calculate time and space complexity for nested loops to identify bottlenecks early. (3 days)"
+        }
+      ],
+      "createdAt": "2026-08-18T07:14:04.580Z"
+    },
+    {
       "_id": "rev_1787036914298_c1yegw",
       "userId": "usr_1787036038722_u8f7lo",
       "language": "Python",
@@ -165,7 +294,7 @@
       ],
       "currentStreak": 1,
       "longestStreak": 1,
-      "updatedAt": "2026-08-18T07:08:34.301Z"
+      "updatedAt": "2026-08-18T07:17:16.735Z"
     }
   ]
 }
