@@ -38,7 +38,11 @@ app.use('/api/progress', progressRoutes);
 
 // ── Health check ──
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Code Saathi backend is running 🚀' });
+  res.json({
+    status: 'ok',
+    db: mongoose.connection.readyState === 1 ? 'mongodb' : 'fallback-storage',
+    message: 'Code Saathi backend is running 🚀'
+  });
 });
 
 // ── Catch-all: serve frontend ──
@@ -46,19 +50,20 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
-// ── Connect MongoDB & Start ──
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log('✅ MongoDB connected');
-    app.listen(PORT, () => {
-      console.log(`🚀 Code Saathi running on http://localhost:${PORT}`);
-    });
-  })
-  .catch(err => {
-    console.error('❌ MongoDB connection failed:', err.message);
-    console.log('💡 Make sure MongoDB is running or set MONGO_URI in .env');
-    // Start server anyway (auth won't work but AI review will)
-    app.listen(PORT, () => {
-      console.log(`⚠️  Server running on http://localhost:${PORT} (DB offline)`);
-    });
-  });
+// ── Start Server Immediately ──
+app.listen(PORT, () => {
+  console.log(`🚀 Code Saathi running on http://localhost:${PORT}`);
+  
+  // Try connecting to MongoDB in the background with a 3s timeout
+  if (process.env.MONGO_URI) {
+    mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 3000 })
+      .then(() => {
+        console.log('✅ MongoDB connected');
+      })
+      .catch(err => {
+        console.log('💡 MongoDB offline. Using local persistent storage fallback (Account & History will work seamlessly).');
+      });
+  } else {
+    console.log('💡 No MONGO_URI provided. Using local persistent storage fallback.');
+  }
+});

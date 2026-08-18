@@ -1,0 +1,171 @@
+{
+  "users": [
+    {
+      "_id": "usr_1787035747086_nwuy3c",
+      "name": "Test User",
+      "email": "test@example.com",
+      "password": "$2a$10$CrWGu5S1Ej4oDpt8Z/sBY..vo.UJZMDiM7QEalzgPCLGLvGgnlyv6",
+      "createdAt": "2026-08-18T06:49:07.086Z",
+      "lastLogin": "2026-08-18T06:49:07.086Z"
+    },
+    {
+      "_id": "usr_1787035826686_6iy2ct",
+      "name": "Rishikant",
+      "email": "2k24.cs1m.2411479@gmail.com",
+      "password": "$2a$10$T/WTq2ns24cAXvYwU5YvreQrveSrTS1U9USJ16vbT1rVCFrE6s9bq",
+      "createdAt": "2026-08-18T06:50:26.686Z",
+      "lastLogin": "2026-08-18T06:50:26.687Z"
+    },
+    {
+      "_id": "usr_1787036038722_u8f7lo",
+      "name": "Rishikant",
+      "email": "rishikantrathore3110@gmail.com",
+      "password": "$2a$10$o.jC89X1toxzzwf/oAg4qOrZH2E2pO2EP3Pe5vFXSzMvJz9G97GTi",
+      "createdAt": "2026-08-18T06:53:58.722Z",
+      "lastLogin": "2026-08-18T06:53:58.722Z"
+    }
+  ],
+  "reviews": [
+    {
+      "_id": "rev_1787036914298_c1yegw",
+      "userId": "usr_1787036038722_u8f7lo",
+      "language": "Python",
+      "code": "def find_duplicates(arr):\n    seen = set()\n    duplicates = set()\n    for num in arr:\n        if num in seen:\n            duplicates.add(num)\n        else:\n            seen.add(num)\n    return list(duplicates)",
+      "score": 95,
+      "scoreLabel": "Excellent",
+      "summary": "This code efficiently identifies unique duplicate elements in an array using sets, demonstrating a strong understanding of data structures and their performance benefits.",
+      "complexity": {
+        "time": "O(n)",
+        "space": "O(n)",
+        "explanation": "The code iterates through the array once (O(n)). Set operations like 'in' and 'add' take O(1) time on average. In the worst case, both 'seen' and 'duplicates' sets could store up to O(n) elements, leading to O(n) space complexity."
+      },
+      "mistakes": [
+        {
+          "title": "Order of Duplicates Not Guaranteed",
+          "body": "Your current implementation correctly identifies unique duplicate values. However, because sets are inherently unordered, the order of elements in the returned list of duplicates is not guaranteed. While often acceptable, it's a point to consider if a specific output order was required by the problem statement."
+        }
+      ],
+      "optimizedCode": "def find_duplicates(arr):\n    # Initialize a set to keep track of elements encountered so far.\n    # Sets offer O(1) average time complexity for add and lookup operations,\n    # which is highly efficient for checking presence.\n    seen = set()\n    \n    # Initialize another set to store the unique duplicate elements found.\n    # Using a set here automatically handles storing only unique duplicates.\n    duplicates = set()\n    \n    # Iterate through each number in the input array.\n    for num in arr:\n        # If the number is already in the 'seen' set, it means we've encountered\n        # it before, indicating it's a duplicate. Add it to the 'duplicates' set.\n        if num in seen:\n            duplicates.add(num)\n        else:\n            # If the number is not in 'seen', it's the first time we're seeing it.\n            # Add it to 'seen' for future checks.\n            seen.add(num)\n            \n    # Convert the set of duplicates to a list before returning.\n    # Note: The order of elements in the returned list is not guaranteed\n    # because sets are unordered data structures.\n    return list(duplicates)",
+      "optimizationNotes": "The original code is already highly optimized for this specific problem using sets, which provide O(1) average time complexity for lookups and insertions. No further significant algorithmic optimization is needed. The 'optimized_code' primarily adds comments for enhanced clarity and readability without changing the core logic or efficiency.",
+      "interviewQuestions": [
+        "How would you modify this function to return *all* occurrences of duplicate numbers, not just the unique duplicate values? (e.g., for `[1,2,2,3,3,3]`, return `[2,2,3,3]`)",
+        "What are the time and space complexity trade-offs if you were restricted from using sets or dictionaries? How would you approach the problem then?",
+        "Can you think of a scenario where the order of duplicates in the output list might matter, and how would you ensure that order is preserved?"
+      ],
+      "roadmap": [
+        {
+          "title": "Mastering Python Data Structures",
+          "desc": "Deepen your understanding of Python's built-in data structures (lists, tuples, sets, dictionaries). Focus on their underlying implementations, typical use cases, and especially their time and space complexity for common operations. This knowledge is crucial for choosing the most efficient data structure for any given problem. Aim to spend 2-3 weeks exploring this in detail."
+        },
+        {
+          "title": "Algorithmic Problem Variation Practice",
+          "desc": "Practice solving variations of common algorithmic problems (e.g., finding unique elements, frequency counts, elements appearing 'k' times). This will help you adapt your solutions and choose appropriate data structures/algorithms based on subtle changes in problem requirements. Dedicate 1-2 hours daily for the next month to solve such problems on platforms like LeetCode or HackerRank."
+        },
+        {
+          "title": "Robust Code Design & Edge Cases",
+          "desc": "Cultivate the habit of always considering edge cases (e.g., empty input, single element, all elements unique, all elements duplicates, very large inputs) when designing your algorithms. This ensures your code is robust and handles all valid inputs gracefully, a critical skill for production-ready code. Practice writing unit tests for your functions to cover these cases. Integrate this thinking into all your coding practice sessions."
+        }
+      ],
+      "createdAt": "2026-08-18T07:08:34.298Z"
+    },
+    {
+      "_id": "rev_1787036868197_cx49hq",
+      "userId": "usr_1787036038722_u8f7lo",
+      "language": "Python",
+      "code": "def find_duplicates(arr):\n    duplicates = []\n    for i in range(len(arr)):\n        for j in range(i+1, len(arr)):\n            if arr[i] == arr[j] and arr[i] not in duplicates:\n                duplicates.append(arr[i])\n    return duplicates\n\nprint(find_duplicates([1, 2, 3, 2, 4, 3, 5]))",
+      "score": 60,
+      "scoreLabel": "Decent",
+      "summary": "The code correctly identifies duplicates but uses a nested loop approach which is inefficient for large datasets.",
+      "complexity": {
+        "time": "O(n^2)",
+        "space": "O(k)",
+        "explanation": "The nested loops compare every element with every other element, leading to quadratic time complexity. Using a hash set can reduce this to linear time."
+      },
+      "mistakes": [
+        {
+          "title": "Inefficient Nested Loops",
+          "body": "Using two loops results in O(n^2) complexity. For large arrays, this will be very slow. Try using a set to track seen elements."
+        },
+        {
+          "title": "Redundant Membership Check",
+          "body": "Checking 'if arr[i] not in duplicates' inside the loop adds extra overhead. Using a set for tracking 'seen' items is much faster."
+        }
+      ],
+      "optimizedCode": "def find_duplicates(arr):\n    seen = set()\n    duplicates = set()\n    for num in arr:\n        if num in seen:\n            duplicates.add(num)\n        else:\n            seen.add(num)\n    return list(duplicates)",
+      "optimizationNotes": "By using two sets, we achieve O(n) time complexity because set lookups and insertions are O(1) on average.",
+      "interviewQuestions": [
+        "How does the time complexity change if we use a hash set versus nested loops?",
+        "What is the space complexity of your optimized solution and why?",
+        "Can you solve this problem in O(1) extra space if the array contains numbers from 1 to n?"
+      ],
+      "roadmap": [
+        {
+          "title": "Mastering Data Structures",
+          "desc": "Learn about Hash Maps and Sets to optimize search operations. (1 week)"
+        },
+        {
+          "title": "Big O Analysis",
+          "desc": "Practice calculating time and space complexity for common algorithms. (1 week)"
+        }
+      ],
+      "createdAt": "2026-08-18T07:07:48.197Z"
+    },
+    {
+      "_id": "rev_1787036079729_xjk2e6",
+      "userId": "usr_1787036038722_u8f7lo",
+      "language": "Python",
+      "code": "def find_duplicates(arr):\n    duplicates = []\n    for i in range(len(arr)):\n        for j in range(i+1, len(arr)):\n            if arr[i] == arr[j] and arr[i] not in duplicates:\n                duplicates.append(arr[i])\n    return duplicates\n\nprint(find_duplicates([1, 2, 3, 2, 4, 3, 5]))",
+      "score": 45,
+      "scoreLabel": "Needs Work",
+      "summary": "The code correctly identifies duplicates but uses an inefficient nested loop approach, which can be significantly optimized.",
+      "complexity": {
+        "time": "O(n^2)",
+        "space": "O(n)",
+        "explanation": "The time complexity is O(n^2) because of the nested loops, where for each element, you iterate through the rest of the array. Additionally, the 'not in duplicates' check on a list can take O(k) time in the worst case (where k is the number of duplicates found so far), making it even slower. The space complexity is O(n) because, in the worst case, the 'duplicates' list might store up to n/2 unique duplicate elements."
+      },
+      "mistakes": [
+        {
+          "title": "Inefficient Duplicate Detection",
+          "body": "Your current approach uses nested loops to compare every element with every other element. While this works, it's very slow for larger arrays. Think about how you might track elements you've already seen more efficiently."
+        },
+        {
+          "title": "Redundant 'in' Check on List",
+          "body": "Inside your inner loop, you're checking `arr[i] not in duplicates`. Checking if an element exists in a list takes time proportional to the list's length. Doing this repeatedly inside a nested loop adds significant overhead, making your code even slower than a simple O(n^2) might suggest."
+        }
+      ],
+      "optimizedCode": "def find_duplicates_optimized(arr):\n    seen = set()\n    duplicates_set = set()\n    for x in arr:\n        if x in seen:\n            duplicates_set.add(x)\n        else:\n            seen.add(x)\n    return list(duplicates_set)\n\nprint(find_duplicates_optimized([1, 2, 3, 2, 4, 3, 5]))",
+      "optimizationNotes": "The optimized code uses two sets: one to track all 'seen' elements and another to store unique 'duplicates'. Sets provide average O(1) time complexity for 'in' checks and 'add' operations, drastically improving the overall performance from O(n^2) to O(n).",
+      "interviewQuestions": [
+        "What is the time complexity of your original solution and why is it considered inefficient for large datasets?",
+        "How can you improve the time complexity of finding duplicates in an array, and what data structures would you use?",
+        "When would using a hash set (like Python's `set`) be more beneficial than a list for checking element existence?"
+      ],
+      "roadmap": [
+        {
+          "title": "Data Structures: Sets and Hash Maps",
+          "desc": "Understanding hash-based data structures like sets and dictionaries (hash maps) is crucial. Learn how they work internally and why their average time complexity for lookups, insertions, and deletions is O(1). This knowledge will help you choose the right tool for problems requiring efficient element tracking. Aim for 2-3 days."
+        },
+        {
+          "title": "Time and Space Complexity Analysis (Big-O)",
+          "desc": "Deepen your understanding of Big-O notation. Practice analyzing the complexity of different algorithms, especially those involving loops, recursion, and various data structures. This skill is fundamental for writing efficient code and acing technical interviews. Dedicate 1 week to practice."
+        },
+        {
+          "title": "Python's `collections` Module",
+          "desc": "Explore Python's `collections` module, specifically `Counter`. It's a powerful tool for counting hashable objects and can simplify solutions for problems involving frequencies or duplicates. Understanding built-in tools can save time and make your code more Pythonic. Spend 1-2 days exploring this module."
+        }
+      ],
+      "createdAt": "2026-08-18T06:54:39.729Z"
+    }
+  ],
+  "streaks": [
+    {
+      "userId": "usr_1787036038722_u8f7lo",
+      "days": [
+        "2026-08-18"
+      ],
+      "currentStreak": 1,
+      "longestStreak": 1,
+      "updatedAt": "2026-08-18T07:08:34.301Z"
+    }
+  ]
+}
