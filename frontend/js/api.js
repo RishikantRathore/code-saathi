@@ -51,8 +51,14 @@ const Api = {
   },
 
   // ── REVIEW ──
-  analyze(code, language) {
-    return this._req('POST', '/api/review/analyze', { code, language });
+  analyze(code, language, options = {}) {
+    return this._req('POST', '/api/review/analyze', {
+      code,
+      language,
+      mode: options.mode,
+      languageStyle: options.languageStyle,
+      customInstruction: options.customInstruction
+    });
   },
   history(page = 1) {
     return this._req('GET', `/api/review/history?page=${page}&limit=30`);

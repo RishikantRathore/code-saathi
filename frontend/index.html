@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
-  <link rel="stylesheet" href="css/main.css?v=3.0">
+  <link rel="stylesheet" href="css/main.css?v=4.4">
 </head>
 <body>
 
@@ -103,58 +103,233 @@
 
   <!-- ═══ REVIEW TAB ═══ -->
   <div id="tab-review" class="tab-panel">
-    <div class="review-layout">
+    <div class="review-layout" id="review-layout">
 
       <!-- LEFT: EDITOR -->
-      <div class="editor-col">
-        <div class="editor-bar">
-          <div class="eb-left">
-            <select id="lang-sel" class="sel">
-              <option>Python</option><option>JavaScript</option><option>Java</option>
-              <option>C++</option><option>C</option><option>TypeScript</option>
-              <option>Go</option><option>Rust</option><option>Kotlin</option><option>Swift</option>
-            </select>
-            <button class="icon-btn" id="hl-btn" onclick="toggleHL()" title="Syntax highlight"><i class="ti ti-highlight"></i></button>
-            <button class="icon-btn" onclick="fmtCode()"  title="Format"><i class="ti ti-indent-increase"></i></button>
-            <button class="icon-btn" onclick="cpyCode()"  title="Copy code"><i class="ti ti-copy"></i></button>
+      <div class="editor-col" id="editor-col">
+        
+        <!-- Workspace Tabs Bar -->
+        <div class="ws-tab-bar" id="ws-tab-bar">
+          <div class="ws-tabs-list" id="ws-tabs-list">
+            <!-- Rendered by Editor.js -->
           </div>
-          <div class="eb-right">
-            <button class="icon-btn" onclick="loadEx()"><i class="ti ti-file-code"></i> Example</button>
-            <button class="icon-btn danger" onclick="clrEditor()"><i class="ti ti-trash"></i></button>
+          <button class="ws-tab-add" onclick="Editor.addTab()" title="New Tab (Ctrl+T)"><i class="ti ti-plus"></i></button>
+          
+          <div class="ws-bar-tools">
+            <div class="theme-select-wrap" title="Editor Theme">
+              <i class="ti ti-palette"></i>
+              <select id="theme-sel" onchange="Editor.setTheme(this.value)">
+                <option value="theme-obsidian">Obsidian Dark</option>
+                <option value="theme-cyberpunk">Cyberpunk Neon</option>
+                <option value="theme-emerald">Emerald Glass</option>
+                <option value="theme-onedark">One Dark Pro</option>
+                <option value="theme-monokai">Monokai Pro</option>
+              </select>
+            </div>
+            <button class="icon-tool-btn" onclick="Editor.zoom(-1)" title="Zoom Out (Ctrl -)"><i class="ti ti-zoom-out"></i></button>
+            <button class="icon-tool-btn" onclick="Editor.zoom(1)" title="Zoom In (Ctrl +)"><i class="ti ti-zoom-in"></i></button>
+            <button class="icon-tool-btn" id="focus-btn" onclick="Editor.toggleFocus()" title="Focus / Fullscreen Mode"><i class="ti ti-maximize"></i></button>
           </div>
         </div>
+
+        <!-- Editor Toolbar -->
+        <div class="editor-bar">
+          <div class="eb-left">
+            <select id="lang-sel" class="sel" onchange="Editor.onLangChange(this.value)">
+              <option value="Python">Python</option>
+              <option value="JavaScript">JavaScript</option>
+              <option value="Java">Java</option>
+              <option value="C++">C++</option>
+              <option value="C">C</option>
+              <option value="TypeScript">TypeScript</option>
+              <option value="Go">Go</option>
+              <option value="Rust">Rust</option>
+              <option value="Kotlin">Kotlin</option>
+              <option value="Swift">Swift</option>
+            </select>
+            <button class="icon-btn highlight-btn" id="preset-modal-btn" onclick="Editor.openPresetsModal()" title="Browse Problem Library & Examples">
+              <i class="ti ti-books"></i> <span>DSA Library</span>
+            </button>
+            <button class="icon-btn" onclick="document.getElementById('file-upload-input').click()" title="Open Source File from Computer">
+              <i class="ti ti-folder-open"></i> <span>Open</span>
+            </button>
+            <input type="file" id="file-upload-input" style="display:none" onchange="Editor.handleFileInput(event)" accept=".py,.js,.ts,.java,.cpp,.c,.go,.rs,.kt,.swift,.txt,.json,.html,.css">
+            <button class="icon-btn" onclick="Editor.fmtCode()" title="Format Code (Ctrl+Shift+F)"><i class="ti ti-indent-increase"></i> <span>Format</span></button>
+            <button class="icon-btn" id="search-toggle-btn" onclick="Editor.toggleSearch()" title="Find & Replace (Ctrl+F)"><i class="ti ti-search"></i></button>
+            <button class="icon-btn" onclick="Editor.cpyCode()" title="Copy Code"><i class="ti ti-copy"></i></button>
+          </div>
+          <div class="eb-right">
+            <button class="icon-btn danger" onclick="Editor.clrEditor()" title="Clear Editor (Ctrl+K)"><i class="ti ti-trash"></i></button>
+          </div>
+        </div>
+
+        <!-- Search & Replace Drawer Overlay -->
+        <div id="editor-search-bar" class="editor-search-bar" style="display:none">
+          <div class="es-row">
+            <div class="es-input-wrap">
+              <i class="ti ti-search"></i>
+              <input type="text" id="es-find" placeholder="Find in code (Enter for next)..." onkeydown="Editor.onFindKey(event)">
+              <span id="es-count" class="es-count">0/0</span>
+            </div>
+            <button class="es-btn" onclick="Editor.findPrev()" title="Previous Match (Shift+Enter)"><i class="ti ti-chevron-up"></i></button>
+            <button class="es-btn" onclick="Editor.findNext()" title="Next Match (Enter)"><i class="ti ti-chevron-down"></i></button>
+            <button class="es-btn es-close" onclick="Editor.toggleSearch(false)"><i class="ti ti-x"></i></button>
+          </div>
+          <div class="es-row" id="es-replace-row">
+            <div class="es-input-wrap">
+              <i class="ti ti-replace"></i>
+              <input type="text" id="es-replace" placeholder="Replace with..." onkeydown="Editor.onReplaceKey(event)">
+            </div>
+            <button class="es-action-btn" onclick="Editor.replaceOne()">Replace</button>
+            <button class="es-action-btn" onclick="Editor.replaceAll()">Replace All</button>
+          </div>
+        </div>
+
+        <!-- Editor Main Body with Gutter -->
         <div class="editor-body" id="editor-body">
-          <textarea id="code-ta" spellcheck="false" placeholder="# Paste your code here…
+          <div class="editor-container" id="editor-container">
+            <div class="editor-gutter" id="editor-gutter" aria-hidden="true">
+              <div class="gutter-num active">1</div>
+            </div>
+            <div class="editor-input-zone">
+              <textarea id="code-ta" spellcheck="false" placeholder="# Paste your code here…
 # Code Saathi will:
 #   ✦ Find & explain mistakes
 #   ✦ Estimate time complexity
 #   ✦ Generate optimized code
 #   ✦ Create interview questions
 #   ✦ Build your learning roadmap"></textarea>
-          <div id="hl-view" style="display:none"></div>
+              <div id="hl-view" style="display:none"></div>
+            </div>
+            <div class="drop-overlay" id="drop-overlay">
+              <i class="ti ti-cloud-upload"></i>
+              <p>Drop your code file here to import</p>
+            </div>
+          </div>
         </div>
+
+        <!-- Realtime Lint / Syntax Notice -->
+        <div id="lint-pill" class="lint-pill" style="display:none"></div>
+
+        <!-- AI Review Mode & Focus Settings -->
+        <div class="editor-foot-settings">
+          <div class="ef-modes">
+            <div class="mode-pill-group">
+              <button class="mode-pill active" data-mode="comprehensive" onclick="Editor.setMode('comprehensive', this)" title="Balanced review across quality, bugs, Big-O and roadmap">
+                <i class="ti ti-sparkles"></i> <span>Comprehensive</span>
+              </button>
+              <button class="mode-pill" data-mode="bug_fixer" onclick="Editor.setMode('bug_fixer', this)" title="Laser focus on bugs, edge-cases and fixes">
+                <i class="ti ti-bug"></i> <span>Bug Hunter</span>
+              </button>
+              <button class="mode-pill" data-mode="complexity" onclick="Editor.setMode('complexity', this)" title="Deep Big-O analysis and memory bottlenecks">
+                <i class="ti ti-clock"></i> <span>Big-O Master</span>
+              </button>
+              <button class="mode-pill" data-mode="interview" onclick="Editor.setMode('interview', this)" title="Mock FAANG Technical Interview Questions">
+                <i class="ti ti-briefcase"></i> <span>Mock Interview</span>
+              </button>
+              <button class="mode-pill" data-mode="security" onclick="Editor.setMode('security', this)" title="Security, memory safety and defense">
+                <i class="ti ti-shield-check"></i> <span>Security</span>
+              </button>
+            </div>
+            <div class="tone-toggle-wrap">
+              <button class="tone-pill" id="tone-btn" onclick="Editor.toggleLanguageTone()" title="Toggle Hinglish / English mentor feedback">
+                <span id="tone-flag">🇮🇳</span> <span id="tone-label">Hinglish: OFF</span>
+              </button>
+              <button class="icon-tool-btn" id="custom-prompt-btn" onclick="Editor.toggleCustomPrompt()" title="Add Custom Review Instructions">
+                <i class="ti ti-adjustments-horizontal"></i>
+              </button>
+            </div>
+          </div>
+          <div class="custom-prompt-drawer" id="custom-prompt-drawer" style="display:none">
+            <input type="text" id="custom-prompt-input" placeholder="e.g. Focus on memory optimization, or explain step-by-step for a first-year student...">
+          </div>
+        </div>
+
+        <!-- Editor Status Footer -->
         <div class="editor-foot">
-          <span id="line-cnt" class="lc">0 lines</span>
+          <div class="ef-stats">
+            <span id="cursor-pos" class="stat-tag">Ln 1, Col 1</span>
+            <span id="line-cnt" class="stat-tag">0 lines</span>
+            <span id="char-cnt" class="stat-tag">0 chars</span>
+            <span id="indent-tag" class="stat-tag clickable" onclick="Editor.toggleIndentSize()" title="Click to toggle 2 spaces / 4 spaces">Spaces: 2</span>
+          </div>
           <button id="analyze-btn" class="analyze-btn" onclick="doAnalyze()">
-            <i class="ti ti-sparkles"></i> Analyze Code
+            <i class="ti ti-sparkles"></i> <span>Analyze Code</span>
+            <span class="btn-kb-hint">Ctrl ↵</span>
           </button>
         </div>
       </div>
 
+      <!-- RESIZER DIVIDER -->
+      <div class="layout-resizer" id="layout-resizer" title="Drag left/right to resize panes">
+        <div class="resizer-handle"></div>
+      </div>
+
       <!-- RIGHT: RESULTS -->
-      <div class="results-col">
+      <div class="results-col" id="results-col">
+        <div class="results-top-bar" id="results-top-bar" style="display:none">
+          <div class="rt-left">
+            <button class="rt-tab active" id="rt-tab-report" onclick="Results.switchView('report')">
+              <i class="ti ti-file-text"></i> Mentor Report
+            </button>
+            <button class="rt-tab" id="rt-tab-diff" onclick="Results.switchView('diff')">
+              <i class="ti ti-git-compare"></i> Compare Diff
+            </button>
+          </div>
+          <div class="rt-right">
+            <button class="rt-btn" id="tts-btn" onclick="Results.toggleAudio()" title="Listen to AI Mentor Audio Explanation">
+              <i class="ti ti-volume"></i> <span id="tts-label">Listen</span>
+            </button>
+            <button class="rt-btn" onclick="Results.downloadOptimized()" title="Download Optimized Code File">
+              <i class="ti ti-download"></i> <span>Download</span>
+            </button>
+          </div>
+        </div>
+
         <div id="results-body" class="results-body">
           <div class="empty-st">
             <i class="ti ti-brain"></i>
             <p>Paste code and click <strong>Analyze Code</strong></p>
-            <small>Full AI-powered review in seconds</small>
+            <small>Full AI-powered review with Big-O complexity, optimized code & interview prep</small>
           </div>
         </div>
+        
         <div id="exp-bar" class="exp-bar" style="display:none">
           <button class="sm-btn" onclick="expPDF()"><i class="ti ti-file-download"></i> Export PDF</button>
           <button class="sm-btn" onclick="cpyReport()"><i class="ti ti-copy"></i> Copy Report</button>
           <button class="sm-btn" onclick="shareRep()"><i class="ti ti-share"></i> Share</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PRESET PROBLEM / DSA LIBRARY MODAL ═══ -->
+  <div id="presets-modal" class="modal-overlay" style="display:none">
+    <div class="modal-box modal-wide">
+      <button class="modal-x" onclick="Editor.closePresetsModal()"><i class="ti ti-x"></i></button>
+      <div class="modal-head-title">
+        <div class="modal-badge-icon"><i class="ti ti-books"></i></div>
+        <div>
+          <h2>DSA & Coding Problem Library</h2>
+          <p>Load real-world coding problems, buggy code snippets, and interview questions</p>
+        </div>
+      </div>
+      <div class="preset-filters">
+        <div class="preset-search-wrap">
+          <i class="ti ti-search"></i>
+          <input type="text" id="preset-search" placeholder="Search problems (Two Sum, DFS, Bug, etc)..." oninput="Editor.filterPresets(this.value)">
+        </div>
+        <div class="preset-tag-pills">
+          <button class="ptag active" onclick="Editor.setPresetTag('all', this)">All</button>
+          <button class="ptag" onclick="Editor.setPresetTag('Easy', this)">Easy</button>
+          <button class="ptag" onclick="Editor.setPresetTag('Medium', this)">Medium</button>
+          <button class="ptag" onclick="Editor.setPresetTag('Buggy', this)">Buggy & Fix Me</button>
+          <button class="ptag" onclick="Editor.setPresetTag('Advanced', this)">Advanced</button>
+          <button class="ptag" onclick="Editor.setPresetTag('Boilerplate', this)">Boilerplates</button>
+        </div>
+      </div>
+      <div class="preset-grid" id="preset-grid">
+        <!-- Rendered by Editor.js -->
       </div>
     </div>
   </div>
@@ -202,12 +377,12 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="js/api.js?v=3.0"></script>
-<script src="js/auth.js?v=3.0"></script>
-<script src="js/editor.js?v=3.0"></script>
-<script src="js/results.js?v=3.0"></script>
-<script src="js/progress.js?v=3.0"></script>
-<script src="js/export.js?v=3.0"></script>
-<script src="js/app.js?v=3.0"></script>
+<script src="js/api.js?v=4.4"></script>
+<script src="js/auth.js?v=4.4"></script>
+<script src="js/editor.js?v=4.4"></script>
+<script src="js/results.js?v=4.4"></script>
+<script src="js/progress.js?v=4.4"></script>
+<script src="js/export.js?v=4.4"></script>
+<script src="js/app.js?v=4.4"></script>
 </body>
 </html>

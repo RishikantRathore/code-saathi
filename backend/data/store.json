@@ -27,6 +27,163 @@
   ],
   "reviews": [
     {
+      "_id": "rev_1787051191379_iqdzyb",
+      "userId": "usr_1787036038722_u8f7lo",
+      "language": "TypeScript",
+      "code": "function isValid(s: string): boolean {\n  const stack: string[] = [];\n  const map: Record<string, string> = {\n    ')': '(',\n    '}': '{',\n    ']': '['\n  };\n\n  for (const char of s) {\n    if (char === '(' || char === '{' || char === '[') {\n      stack.push(char);\n    } else if (map[char]) {\n      if (stack.length === 0 || stack.pop() !== map[char]) {\n        return false;\n      }\n    }\n  }\n\n  return stack.length === 0;\n}\n\nconsole.log(isValid(\"()[]{}\")); // true\nconsole.log(isValid(\"([)]\"));   // false",
+      "score": 75,
+      "scoreLabel": "Decent",
+      "summary": "Code reviewed successfully.",
+      "complexity": {
+        "time": "O(n)",
+        "space": "O(1)",
+        "explanation": "Standard loop execution."
+      },
+      "mistakes": [],
+      "optimizedCode": "function isValid(s: string): boolean {\n  const stack: string[] = [];\n  const map: Record<string, string> = {\n    ')': '(',\n    '}': '{',\n    ']': '['\n  };\n\n  for (const char of s) {\n    if (char === '(' || char === '{' || char === '[') {\n      stack.push(char);\n    } else if (map[char]) {\n      if (stack.length === 0 || stack.pop() !== map[char]) {\n        return false;\n      }\n    }\n  }\n\n  return stack.length === 0;\n}\n\nconsole.log(isValid(\"()[]{}\")); // true\nconsole.log(isValid(\"([)]\"));   // false",
+      "optimizationNotes": "Parsed results.",
+      "interviewQuestions": [
+        "What is the algorithmic efficiency of this function?"
+      ],
+      "roadmap": [
+        {
+          "title": "Optimization",
+          "desc": "Practice writing idiomatic algorithms."
+        }
+      ],
+      "createdAt": "2026-08-18T11:06:31.379Z"
+    },
+    {
+      "_id": "rev_1787051075062_ahpqrx",
+      "userId": "usr_1787036038722_u8f7lo",
+      "language": "Java",
+      "code": "// A simple Java program to concatenate strings of leetcode\n public class addstring {\n    public String addStrings(String num1, String num2) {\n        int i = num1.length() - 1; \n        int j = num2.length() - 1; \n        int carry = 0;\n        StringBuilder sb = new StringBuilder();\n\n        while (i >= 0 || j >= 0 || carry > 0) {\n            int x = (i >= 0) ? num1.charAt(i) - '0' : 0; \n            int y = (j >= 0) ? num2.charAt(j) - '0' : 0; \n            int sum = x + y + carry;\n\n            sb.append(sum % 10); \n            carry = sum / 10;    \n\n            i--;\n            j--;\n        }\n\n        return sb.reverse().toString();\n    }\n}",
+      "score": 98,
+      "scoreLabel": "Excellent",
+      "summary": "This is a very well-implemented and efficient solution for adding two large numbers represented as strings, demonstrating a solid understanding of string manipulation and arithmetic logic.",
+      "complexity": {
+        "time": "O(max(L1, L2))",
+        "space": "O(max(L1, L2))",
+        "explanation": "The time complexity is linear because we iterate through the digits of both numbers once. The space complexity is also linear as we store the result in a StringBuilder, which can be at most one digit longer than the longest input string."
+      },
+      "mistakes": [
+        {
+          "title": "Minor Naming Convention",
+          "body": "While not a functional bug, in Java, class names typically follow PascalCase (e.g., `AddStrings` instead of `addstring`). Adhering to these conventions makes your code more readable and maintainable for other developers (and yourself!). It's a small detail but important for professional code."
+        },
+        {
+          "title": "Clarify Code Comment",
+          "body": "The initial comment `// A simple Java program to concatenate strings of leetcode` is a little misleading. This program performs arithmetic 'addition' of numbers represented as strings, not 'concatenation'. A more accurate comment would improve clarity and correctly describe the program's purpose for anyone reading your code."
+        }
+      ],
+      "optimizedCode": "/**\n * A simple Java program to add two large numbers represented as strings.\n * This approach simulates manual column addition, handling carries.\n */\npublic class AddStrings {\n    public String addStrings(String num1, String num2) {\n        int i = num1.length() - 1; \n        int j = num2.length() - 1; \n        int carry = 0;\n        StringBuilder sb = new StringBuilder();\n\n        // Continue as long as there are digits in either number or a carry exists\n        while (i >= 0 || j >= 0 || carry > 0) {\n            // Get digit from num1, or 0 if num1 is exhausted\n            int x = (i >= 0) ? num1.charAt(i) - '0' : 0; \n            // Get digit from num2, or 0 if num2 is exhausted\n            int y = (j >= 0) ? num2.charAt(j) - '0' : 0; \n            \n            // Calculate sum for current position\n            int sum = x + y + carry;\n\n            // Append the last digit of the sum to the result\n            sb.append(sum % 10); \n            // Update carry for the next iteration\n            carry = sum / 10;    \n\n            // Move to the next digit (leftwards)\n            i--;\n            j--;\n        }\n\n        // The result was built in reverse, so reverse it back and convert to String\n        return sb.reverse().toString();\n    }\n}",
+      "optimizationNotes": "Your current implementation is already highly optimized for this problem! It uses a `StringBuilder` for efficient string manipulation and processes the digits in a single pass, which is the most efficient approach for adding large numbers represented as strings. There are no significant algorithmic optimizations to make it faster or use less space while maintaining correctness. The changes in the optimized code are purely for style and clarity (class name, comments).",
+      "interviewQuestions": [
+        "How would you modify this solution to handle negative numbers, ensuring the correct sign and magnitude in the result?",
+        "What considerations would you need to make if the input strings could contain non-digit characters (e.g., '12a3'), and how would you validate them?",
+        "Can you explain the trade-offs between using `StringBuilder` and direct `String` concatenation in Java, especially for problems involving many string modifications?"
+      ],
+      "roadmap": [
+        {
+          "title": "Explore Large Number Arithmetic",
+          "desc": "Now that you've mastered addition, try implementing other arithmetic operations like subtraction or multiplication for large numbers represented as strings. This will deepen your understanding of digit-by-digit processing and carry/borrow logic. Aim to complete a multiplication problem within 1-2 weeks."
+        },
+        {
+          "title": "Master String Manipulation Techniques",
+          "desc": "Familiarize yourself with other common string algorithms and data structures in Java, such as `String.split()`, `String.substring()`, `toCharArray()`, and regular expressions. Understanding these will make you more versatile in solving string-related problems. Dedicate 3-4 hours to practice problems involving these techniques."
+        },
+        {
+          "title": "Understand Java Collections Framework",
+          "desc": "While not directly related to this problem, a strong grasp of Java's Collections Framework (ArrayList, LinkedList, HashMap, etc.) is crucial for BTech students. Practice using different collections to solve problems efficiently and understand their underlying time/space complexities. Spend 2-3 weeks focusing on the common data structures and their use cases."
+        }
+      ],
+      "createdAt": "2026-08-18T11:04:35.062Z"
+    },
+    {
+      "_id": "rev_1787050999200_4q7hpv",
+      "userId": "usr_1787036038722_u8f7lo",
+      "language": "Python",
+      "code": "def two_sum(nums, target):\n    # Brute force approach with nested loops: O(n^2)\n    for i in range(len(nums)):\n        for j in range(i + 1, len(nums)):\n            if nums[i] + nums[j] == target:\n                return [i, j]\n    return []\n\n# Test cases\nprint(two_sum([2, 7, 11, 15], 9)) # Expected: [0, 1]\nprint(two_sum([3, 2, 4], 6))       # Expected: [1, 2]",
+      "score": 75,
+      "scoreLabel": "Good",
+      "summary": "Aapka `two_sum` function brute-force approach se bilkul sahi kaam kar raha hai, par hum isse aur efficient bana sakte hain.",
+      "complexity": {
+        "time": "O(n^2)",
+        "space": "O(1)",
+        "explanation": "Yahan par do nested loops hain, isliye time complexity O(n^2) hai. Space complexity O(1) hai kyunki hum koi extra data structure use nahi kar rahe hain."
+      },
+      "mistakes": [
+        {
+          "title": "Inefficient Time Complexity",
+          "body": "Aapka current solution nested loops use karta hai, jisse iski time complexity O(n^2) ho jaati hai. Iska matlab hai ki agar `nums` list mein elements badhenge, toh function ka running time square mein badhega. Bade datasets ke liye yeh approach slow ho sakti hai, khaaskar competitive programming ya real-world applications mein jahan performance matter karti hai."
+        }
+      ],
+      "optimizedCode": "def two_sum(nums, target):\n    # Using a hash map (dictionary in Python) for O(n) time complexity\n    # This approach stores numbers and their indices to quickly check for complements.\n    num_map = {} # Stores {number: index}\n\n    for i, num in enumerate(nums):\n        complement = target - num\n        # Check if the complement is already in our map\n        if complement in num_map:\n            # If found, we have our pair! Return its index and the current index.\n            return [num_map[complement], i]\n        # If not found, add the current number and its index to the map\n        # for future checks.\n        num_map[num] = i\n\n    # If no such pair is found after checking all numbers\n    return []\n\n# Test cases\n# print(two_sum([2, 7, 11, 15], 9)) # Expected: [0, 1]\n# print(two_sum([3, 2, 4], 6))       # Expected: [1, 2]\n# print(two_sum([3, 3], 6))         # Expected: [0, 1]\n# print(two_sum([1, 2, 3], 10))     # Expected: []",
+      "optimizationNotes": "Humne yahan par ek dictionary (`num_map`) ka use kiya hai. Yeh dictionary har number ko uske index ke saath store karti hai. Jab hum list mein iterate karte hain, toh hum check karte hain ki kya `target - current_number` pehle se dictionary mein मौजूद hai. Agar hai, toh humein hamara pair mil gaya! Isse time complexity O(n) ho jaati hai aur space complexity O(n) ho jaati hai, jo bade inputs ke liye bahut better hai.",
+      "interviewQuestions": [
+        "Optimized solution mein time aur space complexity ke beech kya trade-off hai? Kya aap koi aisa scenario bata sakte hain jahan O(n^2) solution O(n) se better ho?",
+        "Agar `nums` array sorted hota, toh kya aap `two_sum` ko optimize karne ke liye koi aur technique use kar sakte the? Explain karo.",
+        "Agar function ko saare possible pairs return karne hon jo target sum banate hain (na ki sirf pehla pair), toh aap code mein kya changes karenge?"
+      ],
+      "roadmap": [
+        {
+          "title": "Hash Maps (Dictionaries) ki Gehri Samajh",
+          "desc": "Why: `two_sum` jaise problems ko optimize karne ke liye hash maps (Python mein dictionaries) bahut powerful tool hain. Inki average time complexity O(1) hoti hai lookups, insertions aur deletions ke liye. How: Python mein `dict` kaise kaam karta hai, uski internal working (hashing, collision resolution) ko samjho. Different data structures mein `dict` ka use cases explore karo. Timeframe: 2-3 din."
+        },
+        {
+          "title": "Time aur Space Complexity Analysis mein Mastery",
+          "desc": "Why: Har algorithm ki performance ko judge karne ke liye Big O notation samajhna bahut zaroori hai. Yeh aapko batata hai ki aapka code bade inputs par kitna efficient hoga. How: Different algorithms (sorting, searching) ki complexity analyze karo. Recursion ki complexity kaise calculate karte hain, yeh bhi seekho. Timeframe: 3-4 din."
+        },
+        {
+          "title": "Two Pointers Technique",
+          "desc": "Why: `two_sum` ke kuch variations mein, khaaskar jab array sorted ho, two pointers technique ek aur efficient approach hai jo O(n) time aur O(1) space mein kaam karti hai. How: Is technique ko sorted arrays par apply karna seekho, jaise \"Pair with Target Sum\" ya \"Remove Duplicates from Sorted Array\" problems mein. Timeframe: 2-3 din."
+        }
+      ],
+      "createdAt": "2026-08-18T11:03:19.200Z"
+    },
+    {
+      "_id": "rev_1787050560849_yrqek8",
+      "userId": "usr_1787036038722_u8f7lo",
+      "language": "Python",
+      "code": "print(5)",
+      "score": 95,
+      "scoreLabel": "Excellent",
+      "summary": "This code is syntactically correct and perfectly functional for its intended, albeit simple, purpose.",
+      "complexity": {
+        "time": "O(1)",
+        "space": "O(1)",
+        "explanation": "The operation involves printing a single, constant value, which takes a fixed amount of time and memory regardless of input size."
+      },
+      "mistakes": [
+        {
+          "title": "Lack of Context or Purpose",
+          "body": "While `print(5)` is perfectly valid Python, in a real-world application, code usually serves a larger purpose. For a BTech student, it's crucial to always think about *why* a particular line of code is written and what problem it's trying to solve. This helps in building meaningful programs rather than just executing isolated statements. Always ask: 'What is the goal of this code snippet?'"
+        }
+      ],
+      "optimizedCode": "print(5)\n",
+      "optimizationNotes": "The provided code `print(5)` is already highly optimized for its task. Printing a single literal value is a fundamental, constant-time operation in Python, and there are no further optimizations possible for this specific line of code. It directly performs the requested action with minimal overhead.",
+      "interviewQuestions": [
+        "What is the primary purpose of the `print()` function in Python, and how does it differ from `return`?",
+        "Can you explain how to print multiple items on a single line using the `print()` function, and what are the default separators and end characters?",
+        "Discuss the concept of 'side effects' in programming, and how `print()` can be considered a function with a side effect."
+      ],
+      "roadmap": [
+        {
+          "title": "Master Python Fundamentals",
+          "desc": "Start by solidifying your understanding of Python's core concepts: variables, data types (integers, floats, strings, booleans), operators, and basic input/output. Practice writing small scripts that take user input, perform calculations, and print results. Aim for 1-2 weeks."
+        },
+        {
+          "title": "Control Flow and Functions",
+          "desc": "Next, dive into control flow statements like `if/else`, `for` loops, and `while` loops. Crucially, learn how to define and use functions to encapsulate reusable logic. This is fundamental for writing organized and modular code. Dedicate 2-3 weeks to this."
+        },
+        {
+          "title": "Introduction to Data Structures",
+          "desc": "Once you're comfortable with functions, explore Python's built-in data structures: lists, tuples, dictionaries, and sets. Understand their differences, use cases, and common operations. This knowledge is vital for efficient data handling in any program. Target 3-4 weeks."
+        }
+      ],
+      "createdAt": "2026-08-18T10:56:00.849Z"
+    },
+    {
       "_id": "rev_1787037436731_5ngwqx",
       "userId": "usr_1787036038722_u8f7lo",
       "language": "Python",
@@ -294,7 +451,7 @@
       ],
       "currentStreak": 1,
       "longestStreak": 1,
-      "updatedAt": "2026-08-18T07:17:16.735Z"
+      "updatedAt": "2026-08-18T11:06:31.383Z"
     }
   ]
 }

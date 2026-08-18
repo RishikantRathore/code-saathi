@@ -54,11 +54,80 @@ const CANDIDATE_MODELS = [
 // Remove duplicates
 const UNIQUE_MODELS = [...new Set(CANDIDATE_MODELS)];
 
-// ── Shared Gemini call function with automatic fallback cascade ──
-async function callGemini(code, language) {
-  const prompt =
-    `${SYSTEM_PROMPT}\n\nLanguage: ${language}\n\nCode:\n${code}`;
+function buildPrompt(code, language, options = {}) {
+  const { mode = 'comprehensive', languageStyle = 'english', customInstruction = '' } = options;
 
+  let modeFocus = '';
+  if (mode === 'bug_fixer') {
+    modeFocus = 'Focus intensely on diagnosing runtime bugs, logic errors, edge-cases, null/undefined safety, and explaining the exact cause & step-by-step fix.';
+  } else if (mode === 'complexity') {
+    modeFocus = 'Focus intensely on Big-O time and space complexity, nested iteration bottlenecks, recursion depths, memory usage, and finding optimal mathematical/DSA asymptotic algorithms.';
+  } else if (mode === 'interview') {
+    modeFocus = 'Adopt the persona of a Senior FAANG Technical Interviewer. Grill the student on edge-cases, trade-offs, scalability, and produce high-yield interview follow-up questions.';
+  } else if (mode === 'security') {
+    modeFocus = 'Focus on code security, memory safety, injection vulnerabilities, unhandled exceptions, resource leaks, and production-grade defense.';
+  } else {
+    modeFocus = 'Provide a balanced, high-yield comprehensive code review covering mistakes, complexity, optimization, interview prep, and a learning roadmap.';
+  }
+
+  let languageTone = '';
+  if (languageStyle === 'hinglish') {
+    languageTone = 'IMPORTANT: Explain all summaries, mistake explanations, complexity notes, and roadmap steps in friendly, encouraging conversational HINGLISH (Hindi written in Latin/English alphabet, e.g., "Aapka loop yahan par duplicate check kar raha hai, jise hum Set use karke O(n) me speed up kar sakte hain"). Keep the code and programming keywords in English.';
+  }
+
+  let customBlock = '';
+  if (customInstruction && customInstruction.trim()) {
+    customBlock = `User Note / Specific Focus: ${customInstruction.trim()}`;
+  }
+
+  return `You are Code Saathi, an AI learning-focused code reviewer for BTech students and developers in India.
+Your goal is to help students LEARN — be encouraging, clear, educational, and deeply insightful.
+
+${modeFocus}
+${languageTone}
+${customBlock}
+
+Analyze the provided code and return ONLY valid JSON. No markdown fences, no extra text, nothing outside JSON.
+
+Return exactly this structure:
+{
+  "score": <integer 0-100>,
+  "score_label": <"Needs Work"|"Decent"|"Good"|"Excellent">,
+  "summary": "<one sentence overall quality>",
+  "complexity": {
+    "time": "<Big-O e.g. O(n^2)>",
+    "space": "<Big-O e.g. O(n)>",
+    "explanation": "<1-2 simple sentences for a student>"
+  },
+  "mistakes": [
+    { "title": "<short mistake name>", "body": "<mentor-style simple explanation>" }
+  ],
+  "optimized_code": "<full working optimized code as string>",
+  "optimization_notes": "<brief explanation of improvements>",
+  "interview_questions": ["<q1>","<q2>","<q3>"],
+  "roadmap": [
+    { "title": "<topic>", "desc": "<why, how, timeframe>" }
+  ]
+}
+
+Rules:
+- Return valid JSON only.
+- Format optimized_code with clean indentation, comments, and proper line breaks (\\n). Never condense or minify onto one single line.
+- roadmap 2-3 steps only.
+- interview_questions exactly 3.
+- Do not include markdown fences in the output.
+- Escape all quotes and special characters inside JSON strings properly.
+
+Language: ${language}
+Review Mode: ${mode}
+
+Code:
+${code}`;
+}
+
+// ── Shared Gemini call function with automatic fallback cascade ──
+async function callGemini(code, language, options = {}) {
+  const prompt = buildPrompt(code, language, options);
   let lastError = null;
 
   for (const modelName of UNIQUE_MODELS) {
@@ -128,13 +197,13 @@ const Storage  = require('../services/storage');
 
 // ── POST /api/review/guest  (no auth — guest mode) ──
 router.post('/guest', async (req, res) => {
-  const { code, language } = req.body;
+  const { code, language, mode, languageStyle, customInstruction } = req.body;
   if (!code || !language)
     return res.status(400).json({ error: 'Code and language are required.' });
   if (!process.env.GEMINI_API_KEY)
     return res.status(500).json({ error: 'API key not configured.' });
   try {
-    const result = await callGemini(code, language);
+    const result = await callGemini(code, language, { mode, languageStyle, customInstruction });
     res.json({ result });
   } catch (err) {
     console.error('Guest analyze error:', err);
@@ -144,14 +213,14 @@ router.post('/guest', async (req, res) => {
 
 // ── POST /api/review/analyze  (protected — saves to DB or local fallback) ──
 router.post('/analyze', authMW, async (req, res) => {
-  const { code, language } = req.body;
+  const { code, language, mode, languageStyle, customInstruction } = req.body;
   if (!code || !language)
     return res.status(400).json({ error: 'Code and language are required.' });
   if (!process.env.GEMINI_API_KEY)
     return res.status(500).json({ error: 'Gemini API key not configured on server.' });
 
   try {
-    const result = await callGemini(code, language);
+    const result = await callGemini(code, language, { mode, languageStyle, customInstruction });
 
     if (!result.score_label) {
       throw new Error("Invalid AI response received.");

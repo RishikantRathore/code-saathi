@@ -1,12 +1,19 @@
 /* ═════════════════════════════════════════════════════════════
-   RESULTS.JS — ChatGPT-Style AI Review Renderer
+   RESULTS.JS — Modern AI Review, Diff Comparison & Voice Mentor
    ═════════════════════════════════════════════════════════════ */
 
 const Results = (() => {
   let _last = null;
+  let _currentView = 'report'; // 'report' or 'diff'
+  let _isSpeaking = false;
+  let _speechUtterance = null;
 
   function showLoading(tip) {
+    _stopAudio();
     document.getElementById('exp-bar').style.display = 'none';
+    const topBar = document.getElementById('results-top-bar');
+    if (topBar) topBar.style.display = 'none';
+
     document.getElementById('results-body').innerHTML = `
       <div class="gpt-loading-view">
         <div class="gpt-avatar pulse">
@@ -15,7 +22,7 @@ const Results = (() => {
         <div class="gpt-typing-indicator">
           <span></span><span></span><span></span>
         </div>
-        <div class="gpt-loading-tip" id="ltip">${tip || 'Code Saathi is analyzing your code…'}</div>
+        <div class="gpt-loading-tip" id="ltip">${esc(tip || 'Code Saathi is reviewing your code…')}</div>
       </div>`;
   }
 
@@ -25,28 +32,36 @@ const Results = (() => {
   }
 
   function showError(msg) {
+    _stopAudio();
     document.getElementById('exp-bar').style.display = 'none';
+    const topBar = document.getElementById('results-top-bar');
+    if (topBar) topBar.style.display = 'none';
+
     document.getElementById('results-body').innerHTML = `
       <div class="gpt-empty-view">
         <div class="gpt-avatar error">
           <i class="ti ti-alert-circle"></i>
         </div>
         <h3 style="color:var(--red); font-size:16px; margin-top:10px;">Analysis Failed</h3>
-        <p class="gpt-error-msg">${esc(msg)}</p>
+        <p class="gpt-error-msg" style="color:var(--t2); font-size:13px; max-width:360px; line-height:1.6;">${esc(msg)}</p>
       </div>`;
   }
 
   function clear() {
+    _stopAudio();
     _last = null;
     document.getElementById('exp-bar').style.display = 'none';
+    const topBar = document.getElementById('results-top-bar');
+    if (topBar) topBar.style.display = 'none';
+
     document.getElementById('results-body').innerHTML = `
       <div class="gpt-empty-view">
         <div class="gpt-avatar">
           <i class="ti ti-brain"></i>
         </div>
         <h3 style="font-size:16px; margin-top:8px;">Ready to review your code</h3>
-        <p style="color:var(--t3); font-size:13px; max-width:320px; line-height:1.6;">
-          Paste your code on the left and click <strong>Analyze Code</strong> to get instant feedback, complexity insights, and optimized solutions.
+        <p style="color:var(--t3); font-size:13px; max-width:340px; line-height:1.6;">
+          Paste your code on the left and click <strong>Analyze Code</strong> to get instant feedback, Big-O complexity, optimized code, and interview prep.
         </p>
       </div>`;
   }
@@ -54,17 +69,44 @@ const Results = (() => {
   function getLast() { return _last; }
 
   function render(r, lang) {
-    _last = { r, lang };
+    const origCode = Editor.getCode();
+    _last = { r, lang, origCode };
+    _currentView = 'report';
+
+    const topBar = document.getElementById('results-top-bar');
+    if (topBar) topBar.style.display = 'flex';
+
+    _renderReportView();
+    document.getElementById('exp-bar').style.display = 'flex';
+  }
+
+  function switchView(view) {
+    if (!_last) return;
+    _currentView = view;
+
+    document.getElementById('rt-tab-report')?.classList.toggle('active', view === 'report');
+    document.getElementById('rt-tab-diff')?.classList.toggle('active', view === 'diff');
+
+    if (view === 'report') {
+      _renderReportView();
+    } else {
+      _renderDiffView();
+    }
+  }
+
+  function _renderReportView() {
+    if (!_last) return;
+    const { r, lang } = _last;
     const langLower = (lang || 'plaintext').toLowerCase();
 
     // Score badge colors
     const isHigh = r.score >= 80;
-    const isMid  = r.score >= 60 && r.score < 80;
+    const isMid = r.score >= 60 && r.score < 80;
     const scColor = isHigh ? 'var(--ac)' : isMid ? 'var(--amb)' : 'var(--red)';
-    const scBg    = isHigh ? 'var(--acd)' : isMid ? 'var(--ambd)' : 'var(--redd)';
-    const scGrad  = isHigh ? 'linear-gradient(90deg, #059669, #10b981)' :
-                    isMid  ? 'linear-gradient(90deg, #d97706, #f59e0b)' :
-                             'linear-gradient(90deg, #dc2626, #f43f5e)';
+    const scBg = isHigh ? 'var(--acd)' : isMid ? 'var(--ambd)' : 'var(--redd)';
+    const scGrad = isHigh ? 'linear-gradient(90deg, #059669, #10b981)' :
+      isMid ? 'linear-gradient(90deg, #d97706, #f59e0b)' :
+        'linear-gradient(90deg, #dc2626, #f43f5e)';
 
     // 1. Mistakes list
     const mkHtml = r.mistakes && r.mistakes.length
@@ -128,7 +170,7 @@ const Results = (() => {
           </div>
           <div class="gpt-meta">
             <div class="gpt-name">
-              Code Saathi <span class="gpt-badge">Gemini 2.5 Flash</span>
+              Code Saathi <span class="gpt-badge">Gemini AI Review</span>
             </div>
             <div class="gpt-time">${lang} Review · Just now</div>
           </div>
@@ -171,7 +213,7 @@ const Results = (() => {
           <p class="gpt-cx-desc">${esc(r.complexity.explanation)}</p>
         </div>
 
-        <!-- Section: ChatGPT-Style Code Block -->
+        <!-- Section: Optimized Code Block -->
         <div class="gpt-section">
           <h4 class="gpt-sec-heading"><i class="ti ti-code" style="color:var(--ac)"></i> Optimized Solution</h4>
           <div class="gpt-code-box">
@@ -198,7 +240,7 @@ const Results = (() => {
           <div class="gpt-roadmap-list">${rmHtml}</div>
         </div>
 
-        <!-- ChatGPT Response Footer Feedback -->
+        <!-- Feedback Actions -->
         <div class="gpt-footer-actions">
           <button class="gpt-icon-action" onclick="Results._like(this, 'up')" title="Helpful response"><i class="ti ti-thumb-up"></i></button>
           <button class="gpt-icon-action" onclick="Results._like(this, 'down')" title="Needs improvement"><i class="ti ti-thumb-down"></i></button>
@@ -212,8 +254,128 @@ const Results = (() => {
       const b = document.getElementById('scbar');
       if (b) b.style.width = r.score + '%';
     });
+  }
 
-    document.getElementById('exp-bar').style.display = 'flex';
+  function _renderDiffView() {
+    if (!_last) return;
+    const { r, lang, origCode } = _last;
+    const langLower = (lang || 'plaintext').toLowerCase();
+
+    let origHighlight = '';
+    let optHighlight = '';
+
+    try {
+      if (window.hljs) {
+        origHighlight = hljs.highlight(origCode || '', { language: langLower, ignoreIllegals: true }).value;
+        optHighlight = hljs.highlight(r.optimized_code || '', { language: langLower, ignoreIllegals: true }).value;
+      } else {
+        origHighlight = esc(origCode || '');
+        optHighlight = esc(r.optimized_code || '');
+      }
+    } catch (e) {
+      origHighlight = esc(origCode || '');
+      optHighlight = esc(r.optimized_code || '');
+    }
+
+    document.getElementById('results-body').innerHTML = `
+      <div class="diff-container">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+          <h3 style="font-size:15px; font-weight:700;"><i class="ti ti-git-compare" style="color:var(--cyan)"></i> Side-by-Side Comparison</h3>
+          <span style="font-size:11.5px; color:var(--t2);">Original vs Code Saathi Optimized</span>
+        </div>
+        <div class="diff-panels">
+          <div class="diff-box">
+            <div class="diff-box-head orig"><i class="ti ti-file-x"></i> Your Original Code</div>
+            <pre class="diff-pre"><code class="hljs language-${langLower}">${origHighlight}</code></pre>
+          </div>
+          <div class="diff-box">
+            <div class="diff-box-head opt"><i class="ti ti-file-check"></i> Optimized Solution</div>
+            <pre class="diff-pre"><code class="hljs language-${langLower}">${optHighlight}</code></pre>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ── Text-to-Speech Mentor Audio ──
+  function toggleAudio() {
+    if (!_last) return;
+
+    if (!('speechSynthesis' in window)) {
+      Toast.show('Text-to-speech is not supported on this browser.', 'err');
+      return;
+    }
+
+    if (_isSpeaking) {
+      _stopAudio();
+      Toast.show('Audio stopped.');
+      return;
+    }
+
+    const { r, lang } = _last;
+    let speechText = `Here is your Code Saathi review for ${lang}. Score is ${r.score} out of 100, which is ${r.score_label}. ${r.summary}. Time complexity is ${r.complexity.time}. Space complexity is ${r.complexity.space}. `;
+
+    if (r.mistakes && r.mistakes.length) {
+      speechText += `Found ${r.mistakes.length} important issues: `;
+      r.mistakes.forEach((m, i) => {
+        speechText += `Issue ${i + 1}: ${m.title}. ${m.body}. `;
+      });
+    } else {
+      speechText += `Great job, no major mistakes were detected. `;
+    }
+
+    if (r.roadmap && r.roadmap.length) {
+      speechText += `Next steps: ${r.roadmap[0].title}. ${r.roadmap[0].desc}`;
+    }
+
+    _speechUtterance = new SpeechSynthesisUtterance(speechText);
+    _speechUtterance.rate = 1.0;
+    _speechUtterance.pitch = 1.0;
+
+    _speechUtterance.onstart = () => {
+      _isSpeaking = true;
+      const btn = document.getElementById('tts-btn');
+      const lbl = document.getElementById('tts-label');
+      if (btn) btn.classList.add('playing');
+      if (lbl) lbl.textContent = 'Pause';
+      Toast.show('Speaking mentor advice... 🎙️', 'ok');
+    };
+
+    _speechUtterance.onend = _speechUtterance.onerror = () => {
+      _stopAudio();
+    };
+
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(_speechUtterance);
+  }
+
+  function _stopAudio() {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    _isSpeaking = false;
+    const btn = document.getElementById('tts-btn');
+    const lbl = document.getElementById('tts-label');
+    if (btn) btn.classList.remove('playing');
+    if (lbl) lbl.textContent = 'Listen';
+  }
+
+  // ── Download File ──
+  function downloadOptimized() {
+    if (!_last) return;
+    const { r, lang } = _last;
+    const extMap = { Python: 'py', JavaScript: 'js', TypeScript: 'ts', Java: 'java', 'C++': 'cpp', C: 'c', Go: 'go', Rust: 'rs', Kotlin: 'kt', Swift: 'swift' };
+    const ext = extMap[lang] || 'txt';
+    const blob = new Blob([r.optimized_code || ''], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `optimized_solution.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    Toast.show(`Downloaded optimized_solution.${ext}! 💾`, 'ok');
   }
 
   function _cpOpt(id, btn) {
@@ -261,5 +423,18 @@ const Results = (() => {
     return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-  return { showLoading, setTip, showError, clear, render, getLast, _cpOpt, _cpText, _like };
+  return {
+    showLoading,
+    setTip,
+    showError,
+    clear,
+    render,
+    getLast,
+    switchView,
+    toggleAudio,
+    downloadOptimized,
+    _cpOpt,
+    _cpText,
+    _like
+  };
 })();
