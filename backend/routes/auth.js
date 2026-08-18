@@ -1,16 +1,28 @@
 // routes/auth.js
-const express = require('express');
-const jwt     = require('jsonwebtoken');
-const User    = require('../models/User');
-const authMW  = require('../middleware/auth');
-const router  = express.Router();
+const express  = require('express');
+const mongoose = require('mongoose');
+const jwt      = require('jsonwebtoken');
+const User     = require('../models/User');
+const authMW   = require('../middleware/auth');
+const router   = express.Router();
 
 function makeToken(userId) {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '30d' });
+  const secret = process.env.JWT_SECRET || 'codesaathi_fallback_secret_key_2024';
+  return jwt.sign({ userId }, secret, { expiresIn: '30d' });
+}
+
+// Middleware to check DB connection
+function checkDB(req, res, next) {
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      error: 'Database is offline. Please start MongoDB (or use MongoDB Atlas), or click "Continue as Guest".'
+    });
+  }
+  next();
 }
 
 // ── POST /api/auth/register ──
-router.post('/register', async (req, res) => {
+router.post('/register', checkDB, async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -33,12 +45,15 @@ router.post('/register', async (req, res) => {
     });
   } catch (err) {
     console.error('Register error:', err);
-    res.status(500).json({ error: 'Server error. Please try again.' });
+    if (err.code === 11000) {
+      return res.status(400).json({ error: 'An account with this email already exists.' });
+    }
+    res.status(500).json({ error: err.message || 'Server error. Please try again.' });
   }
 });
 
 // ── POST /api/auth/login ──
-router.post('/login', async (req, res) => {
+router.post('/login', checkDB, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -63,14 +78,15 @@ router.post('/login', async (req, res) => {
     });
   } catch (err) {
     console.error('Login error:', err);
-    res.status(500).json({ error: 'Server error. Please try again.' });
+    res.status(500).json({ error: err.message || 'Server error. Please try again.' });
   }
 });
 
 // ── GET /api/auth/me  (verify token, get profile) ──
-router.get('/me', authMW, (req, res) => {
+router.get('/me', checkDB, authMW, (req, res) => {
   const u = req.user;
   res.json({ user: { id: u._id, name: u.name, email: u.email } });
 });
 
 module.exports = router;
+

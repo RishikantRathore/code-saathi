@@ -1,6 +1,8 @@
 /* api.js — All HTTP calls to the backend */
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = (window.location.protocol.startsWith('http') && (window.location.port === '5000' || !window.location.port))
+  ? ''
+  : 'http://localhost:5000';
 
 const Api = {
 
@@ -18,11 +20,24 @@ const Api = {
   async _req(method, path, body) {
     const opts = { method, headers: this._headers() };
     if (body) opts.body = JSON.stringify(body);
-    const res  = await fetch(API_BASE + path, opts);
-    const data = await res.json();
+    let res;
+    try {
+      res = await fetch(API_BASE + path, opts);
+    } catch (netErr) {
+      throw new Error('Cannot connect to backend server. Ensure "npm run dev" is running in the backend folder.');
+    }
+    
+    let data;
+    try {
+      data = await res.json();
+    } catch (parseErr) {
+      throw new Error(`Server returned status ${res.status}`);
+    }
+
     if (!res.ok) throw new Error(data.error || 'Request failed');
     return data;
   },
+
 
   // ── AUTH ──
   register(name, email, password) {
